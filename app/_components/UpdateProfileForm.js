@@ -1,18 +1,36 @@
 "use client";
+import { ToastContainer, toast } from "react-toastify";
+import { useActionState, useEffect, useState } from "react";
+import { updateGuest } from "../_lib/actions";
+import { useFormStatus } from "react-dom";
+import SpinnerMini from "./SpinnerMini";
 
-import { useState } from "react";
+function UpdateProfileForm({ guest, children }) {
+  const { fullName, email, nationality, nationalID, countryFlag } = guest;
 
-function UpdateProfileForm({ children }) {
-  const [count, setCount] = useState();
-  // CHANGE
-  const countryFlag = "pt.jpg";
-  const nationality = "portugal";
+  const [state, formAction] = useActionState(updateGuest, {
+    message: "",
+    success: false,
+  });
+
+  useEffect(() => {
+    if (state.success) {
+      toast.success(state.message);
+    } else if (state.message) {
+      toast.error(state.message);
+    }
+  }, [state]);
 
   return (
-    <form className="bg-primary-900 py-8 px-12 text-lg flex gap-6 flex-col">
+    <form
+      action={formAction}
+      className="bg-primary-900 py-8 px-12 text-lg flex gap-6 flex-col"
+    >
       <div className="space-y-2">
         <label>Full name</label>
         <input
+          defaultValue={fullName}
+          name="fullName"
           disabled
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-400"
         />
@@ -21,6 +39,8 @@ function UpdateProfileForm({ children }) {
       <div className="space-y-2">
         <label>Email address</label>
         <input
+          defaultValue={email}
+          name="email"
           disabled
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-400"
         />
@@ -43,16 +63,30 @@ function UpdateProfileForm({ children }) {
         <label htmlFor="nationalID">National ID number</label>
         <input
           name="nationalID"
+          defaultValue={nationalID}
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
         />
       </div>
-
       <div className="flex justify-end items-center gap-6">
-        <button className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
-          Update profile
-        </button>
+        <Button />
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </form>
+  );
+}
+
+function Button() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      disabled={pending}
+      className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold
+  hover:bg-accent-600 transition-all
+  disabled:cursor-not-allowed disabled:bg-gray-500
+  disabled:text-gray-300 disabled:opacity-70"
+    >
+      {pending ? <SpinnerMini /> : "Update profile"}
+    </button>
   );
 }
 

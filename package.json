@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "prod":"next build && next start",
+    "prod": "next build && next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -14,8 +14,11 @@
     "@supabase/supabase-js": "^2.117.3",
     "date-fns": "^4.4.0",
     "next": "^16.4.0",
+    "next-auth": "^5.0.0-beta.32",
     "react": "^18",
-    "react-dom": "^18"
+    "react-day-picker": "^10.0.2",
+    "react-dom": "^18",
+    "react-toastify": "^11.1.0"
   },
   "devDependencies": {
     "eslint": "^8",
