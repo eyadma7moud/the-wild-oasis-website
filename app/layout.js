@@ -1,7 +1,8 @@
 import Logo from "./_components/Logo";
 import Navigation from "./_components/Navigation";
 import Header from "./_components/Header";
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Josefin_Sans } from "next/font/google";
 
 const josefin = Josefin_Sans({
@@ -33,6 +34,7 @@ export default function RootLayout({ children }) {
           <main className="max-w-7xl mx-auto w-full">
             <ReservationProvider>{children}</ReservationProvider>
           </main>
+            <ToastContainer position="top-right" autoClose={3000} />
         </div>
       </body>
     </html>

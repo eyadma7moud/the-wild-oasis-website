@@ -136,7 +136,6 @@ export async function getSettings() {
   return data;
 }
 
-
 export async function getCountries() {
   try {
     const res = await fetch(
@@ -145,7 +144,7 @@ export async function getCountries() {
         headers: {
           Authorization: `Bearer ${process.env.REST_COUNTRIES_API_KEY}`,
         },
-      }
+      },
     );
 
     if (!res.ok) {

@@ -2,6 +2,7 @@
 import { supabase } from "./supabase";
 import { auth, signIn, signOut } from "./auth";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function updateGuest(prevState, formData) {
   try {
@@ -63,6 +64,59 @@ export async function updateGuest(prevState, formData) {
   }
 }
 
+export async function createReservation(bookingData, previousState, formData) {
+  try {
+    const session = await auth();
+
+    if (!session) {
+      return { success: false, message: "You must be logged in." };
+    }
+
+    const newBooking = {
+      ...bookingData,
+      guestId: session.user.guestId,
+      numGuests: Number(formData.get("numGuests")),
+      observations: formData.get("observations").slice(0, 200),
+      extraPrice: 0,
+      totalPrice: bookingData.cabinPrice,
+      status: "unconfirmed",
+    };
+
+    const { error } = await supabase.from("bookings").insert([newBooking]);
+
+    if (error) {
+      return {
+        success: false,
+        message: "Booking could not be created.",
+      };
+    }
+
+    revalidatePath(`/cabins/${bookingData.cabinId}`);
+  } catch {
+    return {
+      success: false,
+      message: "Something went wrong. Please try again.",
+    };
+  }
+  redirect("/cabins/thankyou");
+}
+
+export async function deleteReservation({ bookingId }) {
+  const session = await auth();
+  if (!session) throw new Error("You must be logged in");
+
+  const { error } = await supabase
+    .from("bookings")
+    .delete()
+    .eq("id", bookingId)
+    .eq("guestId", session.user.guestId)
+    .select();
+
+  if (error) {
+    throw new Error("Booking could not be deleted");
+  }
+  revalidatePath("/account/reservations");
+}
 
 export async function signinAction() {
   await signIn("google", { redirectTo: "/account" });

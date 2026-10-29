@@ -1,8 +1,9 @@
 "use client";
-import { isWithinInterval } from "date-fns";
+import { isPast, isSameDay, isWithinInterval } from "date-fns";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useReservation } from "./ReservationsContext";
+import { differenceInDays } from "date-fns";
 
 function isAlreadyBooked(range, datesArr) {
   return (
@@ -16,8 +17,13 @@ function isAlreadyBooked(range, datesArr) {
 
 function DateSelector({ settings, bookedDates, cabin }) {
   const { range, setRange, resetRange } = useReservation();
-  // CHANGE
-  const { regularPrice, discount, numNights, cabinPrice } = cabin;
+  const displayedRange = isAlreadyBooked(range, bookedDates) ? {} : range;
+  const {
+    regularPrice,
+    discount,
+    numNights = differenceInDays(range.to, range.from),
+    cabinPrice = numNights * (regularPrice - discount),
+  } = cabin;
   // const range = { from: null, to: null };
 
   // SETTINGS
@@ -27,14 +33,34 @@ function DateSelector({ settings, bookedDates, cabin }) {
     <div className="flex flex-col justify-between min-w-0 ">
       <DayPicker
         mode="range"
-        onSelect={(range) => setRange(range)}
-        selected={range}
+        onSelect={(range) => {
+          if (!range?.from || !range?.to) {
+            setRange(range);
+            return;
+          }
+
+          const hasBookedDate = bookedDates.some(
+            (date) => date > range.from && date < range.to,
+          );
+
+          if (hasBookedDate) {
+            resetRange();
+            return;
+          }
+
+          setRange(range);
+        }}
+        selected={displayedRange}
         min={minBookingLength + 1}
         max={maxBookingLength}
         startMonth={new Date()}
         endMonth={new Date(new Date().getFullYear() + 5, 11)}
         captionLayout="dropdown"
         numberOfMonths={2}
+        disabled={(curDate) =>
+          isPast(curDate) ||
+          bookedDates.some((date) => isSameDay(date, curDate))
+        }
         className="pt-6 mx-auto"
         classNames={{
           months: "flex flex-row gap-4",
